@@ -23,8 +23,7 @@ export default function CompanySelect() {
           {companies.map((company) => (
             <div
               key={company.id}
-              onClick={() => navigate(`/${company.id}`)}
-              className="bg-white rounded-2xl shadow-xl p-8 cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-amber-400"
+              className="bg-white rounded-2xl shadow-xl p-8 border-2 border-amber-100 hover:border-amber-300 transition-all"
             >
               <div className="text-6xl mb-4 text-center">{company.logo}</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
@@ -33,12 +32,31 @@ export default function CompanySelect() {
               <p className="text-amber-600 font-medium mb-3 text-center">
                 {company.tagline}
               </p>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">
                 {company.description}
               </p>
-              <div className="mt-6 text-center">
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => navigate(`/${company.id}/call`)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="text-xl">📞</span>
+                  Talk to Piero
+                </button>
+                
+                <button
+                  onClick={() => navigate(`/${company.id}`)}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="text-xl">🔍</span>
+                  Product Finder
+                </button>
+              </div>
+              
+              <div className="mt-4 text-center">
                 <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
-                  {company.type === 'retail' ? 'Premium Retail Demo' : 'B2B Wholesale Demo'}
+                  {company.type === 'retail' ? 'Premium Retail' : 'B2B Wholesale'}
                 </span>
               </div>
             </div>
