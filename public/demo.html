@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katy Port - Keenetic Voice Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 60px 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #718096;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #2d3748;
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .modal-subtext {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .submit-button {
+            width: 100%;
+            background: #2d3748;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-button:hover {
+            background: #1a202c;
+        }
+
+        .submit-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* Ready to Talk Modal */
+        .ready-modal-content {
+            text-align: center;
+        }
+
+        .ready-text {
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+
+        .call-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .call-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .call-button.active {
+            background: #dc2626;
+        }
+
+        .call-button.active:hover {
+            background: #b91c1c;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #718096;
+        }
+
+        .status.connecting {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .languages {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="avatar">👩‍💼</div>
+            <h1>Hi, I'm Katy Port</h1>
+            <div class="subtitle">Onboarding Customer Manager at Keenetic</div>
+        </div>
+
+        <div class="description">
+            Let me help you find the most efficient routing solutions for your home or business.
+        </div>
+
+        <button class="cta-button" id="main-cta">
+            📞 Find your router solution, Call me
+        </button>
+
+        <div class="languages">
+            🇬🇧 English &nbsp;|&nbsp; 🇮🇹 Italiano &nbsp;|&nbsp; 🇪🇸 Español &nbsp;|&nbsp; 🇷🇺 Русский
+        </div>
+    </div>
+
+    <!-- Name/Email Modal -->
+    <div class="modal" id="info-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="close-info-modal">×</button>
+            <div class="modal-header">Before we connect you</div>
+            <div class="modal-subtext">Please enter your details so Katy knows who she's speaking with.</div>
+            
+            <form id="contact-form">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="customer-name" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-input" id="customer-email" placeholder="Your email" required>
+                </div>
+                <button type="submit" class="submit-button">Continue →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ready to Talk Modal -->
+    <div class="modal" id="ready-modal">
+        <div class="modal-content ready-modal-content">
+            <button class="modal-close" id="close-ready-modal">×</button>
+            <div class="ready-text" id="ready-text">Ready to talk, <span id="customer-first-name"></span>?</div>
+            
+            <button class="call-button" id="call-button">
+                <span id="call-icon">📞</span>
+                <span id="call-text">Talk to Katy</span>
+            </button>
+
+            <div class="status" id="call-status"></div>
+        </div>
+    </div>
+
+    <!-- Vapi Web SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.umd.js"></script>
+    
+    <script>
+        // Configuration
+        const VAPI_PUBLIC_KEY = '28535a4b-015a-45b0-8d85-a6141da56ed0';
+        const ASSISTANT_ID = '4917a22c-c1e4-483b-8d57-0ea3640dbded';
+
+        // State
+        let customerData = {
+            name: '',
+            email: '',
+            firstName: ''
+        };
+        let isCallActive = false;
+        let vapi = null;
+
+        // Elements
+        const mainCta = document.getElementById('main-cta');
+        const infoModal = document.getElementById('info-modal');
+        const readyModal = document.getElementById('ready-modal');
+        const contactForm = document.getElementById('contact-form');
+        const callButton = document.getElementById('call-button');
+        const callStatus = document.getElementById('call-status');
+        const closeInfoModal = document.getElementById('close-info-modal');
+        const closeReadyModal = document.getElementById('close-ready-modal');
+
+        // Ringing sound (simple sine wave)
+        let audioContext;
+        let ringingOscillator;
+        let ringingGain;
+
+        function playRingingSound() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            ringingOscillator = audioContext.createOscillator();
+            ringingGain = audioContext.createGain();
+            
+            ringingOscillator.connect(ringingGain);
+            ringingGain.connect(audioContext.destination);
+            
+            ringingOscillator.frequency.value = 440; // A4 note
+            ringingGain.gain.value = 0.1;
+            
+            // Ring pattern: beep-beep pause beep-beep pause
+            let time = audioContext.currentTime;
+            ringingGain.gain.setValueAtTime(0, time);
+            
+            for (let i = 0; i < 3; i++) {
+                const offset = i * 2;
+                // First beep
+                ringingGain.gain.setValueAtTime(0.1, time + offset);
+                ringingGain.gain.setValueAtTime(0, time + offset + 0.2);
+                // Second beep
+                ringingGain.gain.setValueAtTime(0.1, time + offset + 0.4);
+                ringingGain.gain.setValueAtTime(0, time + offset + 0.6);
+            }
+            
+            ringingOscillator.start(time);
+            ringingOscillator.stop(time + 6);
+        }
+
+        function stopRingingSound() {
+            if (ringingOscillator) {
+                try {
+                    ringingOscillator.stop();
+                } catch (e) {
+                    // Already stopped
+                }
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+        }
+
+        // Event Handlers
+        mainCta.addEventListener('click', () => {
+            infoModal.classList.add('active');
+        });
+
+        closeInfoModal.addEventListener('click', () => {
+            infoModal.classList.remove('active');
+        });
+
+        closeReadyModal.addEventListener('click', () => {
+            readyModal.classList.remove('active');
+            if (isCallActive) {
+                vapi.stop();
+            }
+        });
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            customerData.name = document.getElementById('customer-name').value;
+            customerData.email = document.getElementById('customer-email').value;
+            customerData.firstName = customerData.name.split(' ')[0];
+            
+            // Close info modal, open ready modal
+            infoModal.classList.remove('active');
+            
+            document.getElementById('customer-first-name').textContent = customerData.firstName;
+            readyModal.classList.add('active');
+        });
+
+        callButton.addEventListener('click', async () => {
+            if (!isCallActive) {
+                // Start call
+                callStatus.textContent = 'Connecting...';
+                callStatus.className = 'status connecting';
+                
+                // Play ringing sound
+                playRingingSound();
+                
+                try {
+                    // Initialize Vapi
+                    if (!vapi) {
+                        vapi = new Vapi(VAPI_PUBLIC_KEY);
+                        
+                        // Set up event listeners
+                        vapi.on('call-start', () => {
+                            console.log('Call started');
+                            stopRingingSound();
+                            callStatus.textContent = '🎤 Connected - Katy is speaking!';
+                            callStatus.className = 'status';
+                            callButton.classList.add('active');
+                            document.getElementById('call-icon').textContent = '📞';
+                            document.getElementById('call-text').textContent = 'End Call';
+                        });
+
+                        vapi.on('call-end', () => {
+                            console.log('Call ended');
+                            stopRingingSound();
+                            callButton.classList.remove('active');
+                            document.getElementById('call-icon').textContent = '📞';
+                            document.getElementById('call-text').textContent = 'Talk to Katy';
+                            callStatus.textContent = 'Call ended. Thanks for chatting!';
+                            callStatus.className = 'status';
+                            isCallActive = false;
+                            
+                            setTimeout(() => {
+                                readyModal.classList.remove('active');
+                                contactForm.reset();
+                            }, 3000);
+                        });
+
+                        vapi.on('speech-start', () => {
+                            console.log('User started speaking');
+                        });
+
+                        vapi.on('speech-end', () => {
+                            console.log('User stopped speaking');
+                        });
+
+                        vapi.on('message', (message) => {
+                            console.log('Message:', message);
+                        });
+
+                        vapi.on('error', (error) => {
+                            console.error('Vapi error:', error);
+                            stopRingingSound();
+                            callStatus.textContent = 'Connection error. Please try again.';
+                            callStatus.className = 'status';
+                            isCallActive = false;
+                            callButton.classList.remove('active');
+                            document.getElementById('call-icon').textContent = '📞';
+                            document.getElementById('call-text').textContent = 'Talk to Katy';
+                        });
+                    }
+                    
+                    await vapi.start({
+                        assistantId: ASSISTANT_ID,
+                        assistantOverrides: {
+                            variableValues: {
+                                customer_first_name: customerData.firstName,
+                                customer_name: customerData.name,
+                                customer_email: customerData.email
+                            }
+                        }
+                    });
+                    
+                    isCallActive = true;
+                    
+                } catch (error) {
+                    console.error('Error starting call:', error);
+                    stopRingingSound();
+                    callStatus.textContent = 'Connection failed. Please try again.';
+                    callStatus.className = 'status';
+                }
+            } else {
+                // End call
+                vapi.stop();
+                stopRingingSound();
+            }
+        });
+
+        // Close modals on outside click
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.classList.remove('active');
+            }
+        });
+
+        readyModal.addEventListener('click', (e) => {
+            if (e.target === readyModal) {
+                if (isCallActive) {
+                    vapi.stop();
+                }
+                readyModal.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
