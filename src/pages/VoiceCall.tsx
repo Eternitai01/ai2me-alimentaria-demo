@@ -1,12 +1,12 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Phone, PhoneOff } from "lucide-react";
+import { ArrowLeft, Phone, PhoneOff, X } from "lucide-react";
 import Vapi from "@vapi-ai/web";
 import { francoVoices } from "@/config/franco-voices";
 import { companies } from "@/data/companies";
 
 const VAPI_PUBLIC_KEY = "28535a4b-015a-45b0-8d85-a6141da56ed0";
-const ASSISTANT_ID = "18112336-963a-466d-b634-5d8d31753a44"; // Piero Pini assistant
+const ASSISTANT_ID = "18112336-963a-466d-b634-5d8d31753a44";
 
 interface VoiceCallProps {
   company: 'ferrarini' | 'litera-meat';
@@ -21,6 +21,7 @@ const VoiceCall = ({ company }: VoiceCallProps) => {
   const [submitted, setSubmitted] = useState(false);
   const [callActive, setCallActive] = useState(false);
   const [callStatus, setCallStatus] = useState("");
+  const [showCallForm, setShowCallForm] = useState(true);
   const vapiRef = useRef<Vapi | null>(null);
   const ringingAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -120,150 +121,146 @@ const VoiceCall = ({ company }: VoiceCallProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
-      <header className="px-8 py-6 border-b border-amber-200 bg-white/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="flex items-center justify-between px-8 lg:px-16 py-4 border-b border-border h-16">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to demos
+          Back
         </button>
+        <div className="text-xl font-bold text-foreground tracking-wider uppercase">
+          {companyData.name}
+        </div>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground uppercase tracking-wider">
+          {Object.entries(francoVoices).map(([key, voice]) => (
+            <button
+              key={key}
+              onClick={() => setLanguage(key)}
+              className={`transition-colors ${language === key ? "text-foreground font-semibold" : "hover:text-foreground"}`}
+            >
+              {voice.flag} {voice.language.substring(0, 3).toUpperCase()}
+            </button>
+          ))}
+        </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-8 pt-16 pb-24">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <img 
-              src="/piero-pini.jpg" 
-              alt="Piero Pini" 
-              className="w-24 h-24 rounded-full object-cover border-4 border-amber-300 shadow-lg"
-            />
-            <div className="text-left">
-              <h1 className="text-4xl font-bold text-gray-900">
-                Talk to Piero Pini
-              </h1>
-              <p className="text-lg text-amber-700 font-semibold mt-1">
-                Founder & Owner, {companyData.name}
-              </p>
-            </div>
+      {/* Hero */}
+      <section className="px-8 lg:px-16 pt-20 pb-16 max-w-5xl">
+        <div className="flex items-center gap-6 mb-10">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border shadow-sm flex-shrink-0">
+            <img src="/piero-pini.jpg" alt="Piero Pini" className="w-full h-full object-cover" />
           </div>
-          <p className="text-gray-600 text-lg">
-            {company === 'ferrarini' 
-              ? 'Get expert advice on our premium Italian charcuterie'
-              : 'Discuss your bulk pork export needs directly with the founder'}
-          </p>
+          <div>
+            <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-[1.1] tracking-tight">
+              Talk to <span className="text-foreground">Piero Pini</span>
+            </h1>
+            <p className="text-lg text-muted-foreground mt-1">Founder & Owner, Gruppo Pini</p>
+          </div>
+        </div>
+        <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
+          {company === 'ferrarini' 
+            ? 'Get expert advice on our premium Italian charcuterie. Piero knows every cut, every pairing, and every certification.'
+            : 'Discuss your bulk pork export needs directly with the founder. Piero has built one of Europe\'s largest meat companies.'}
+        </p>
+
+        <div className="flex flex-wrap gap-4 mt-10">
+          <button
+            onClick={() => !showCallForm && setShowCallForm(true)}
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-lg hover:scale-105 transition-all ${
+              callActive
+                ? "bg-destructive text-destructive-foreground animate-pulse"
+                : "bg-primary text-primary-foreground hover:opacity-90"
+            }`}
+          >
+            {callActive ? (
+              <>
+                <PhoneOff className="w-4 h-4" /> End Call
+              </>
+            ) : (
+              <>
+                <Phone className="w-4 h-4" /> Call Piero Now
+              </>
+            )}
+          </button>
         </div>
 
-        {!submitted ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-amber-100">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:outline-none transition-colors"
-                  placeholder="John Smith"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Your Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-amber-500 focus:outline-none transition-colors"
-                  placeholder="john@company.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Preferred Language
-                </label>
-                <div className="grid grid-cols-4 gap-3">
-                  {Object.entries(francoVoices).map(([key, voice]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setLanguage(key)}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        language === key
-                          ? 'border-amber-600 bg-amber-50'
-                          : 'border-gray-200 hover:border-amber-300'
-                      }`}
-                    >
-                      <div className="text-2xl mb-1">{voice.flag}</div>
-                      <div className="text-xs font-medium text-gray-700">{voice.language}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full bg-amber-600 text-white font-semibold py-4 px-6 rounded-full hover:bg-amber-700 transition-all shadow-lg text-lg"
-              >
-                Continue to Call
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-amber-100 text-center">
-            <div className="mb-6">
-              <p className="text-gray-600 mb-2">Ready to talk with</p>
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">Piero Pini</h2>
-              <p className="text-amber-700">in {francoVoices[language].language}</p>
-            </div>
-
+        {/* Call Form */}
+        {showCallForm && (
+          <div className="mt-8 max-w-md p-6 rounded-lg border border-border bg-card relative animate-in slide-in-from-top-2 fade-in duration-200">
             <button
-              onClick={toggleCall}
-              className={`w-full py-6 px-8 rounded-full font-semibold text-lg transition-all shadow-lg flex items-center justify-center gap-3 ${
-                callActive
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
+              onClick={() => { 
+                setShowCallForm(false); 
+                if (callActive) { 
+                  getVapi().stop(); 
+                  setCallActive(false); 
+                  setCallStatus(""); 
+                } 
+              }}
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {callActive ? (
-                <>
-                  <PhoneOff className="w-6 h-6" />
-                  End Call
-                </>
-              ) : (
-                <>
-                  <Phone className="w-6 h-6" />
-                  Call Piero Now
-                </>
-              )}
+              <X className="w-4 h-4" />
             </button>
 
-            {callStatus && (
-              <div className="mt-6 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg">
-                {callStatus}
-              </div>
-            )}
-
-            {callActive && (
-              <p className="mt-6 text-sm text-gray-500">
-                💡 Tip: Speak naturally - Piero understands your questions and will help you find the perfect products.
-              </p>
+            {!submitted ? (
+              <>
+                <p className="text-sm font-semibold text-foreground mb-1">Before we connect you...</p>
+                <p className="text-sm text-muted-foreground mb-4">Piero will greet you by name</p>
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={100}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  />
+                  {error && (
+                    <p className="text-xs text-destructive">{error}</p>
+                  )}
+                  <button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    Continue
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Ready! Click the button above to call Piero in {francoVoices[language].language}
+                </p>
+                <button
+                  onClick={toggleCall}
+                  className={`w-full py-3 px-4 rounded-full text-sm font-semibold transition-all ${
+                    callActive
+                      ? "bg-destructive text-destructive-foreground"
+                      : "bg-primary text-primary-foreground hover:opacity-90"
+                  }`}
+                >
+                  {callActive ? "End Call" : "Call Now"}
+                </button>
+                {callStatus && (
+                  <p className="text-xs text-muted-foreground mt-3 text-center animate-pulse">
+                    {callStatus}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
-      </main>
+      </section>
     </div>
   );
 };
